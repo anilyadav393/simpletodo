@@ -1,139 +1,138 @@
-import './App.css';
-import React, {useState, useEffect} from 'react';
+import React from 'react';
+import {useState, useEffect} from "react"
+import {useSelector, useDispatch} from "react-redux"
+import {addToCart} from "./redux/cartSlice"
 
 
-const App = ()  =>  {
+const App = ()=> {
+  const [cartOpen, setCartOpen] = useState(false)
+  const [popUp, setPopUp] = useState(false)
+  console.log("cart opening", cartOpen)
+  const dispatch = useDispatch()
+  const myCartItems = useSelector((state)=>state.cart)
+  console.log("my cart items are",myCartItems)
+  const initialProducts=[
+    {
+        id:1,
+        name:"Key board",
+        price:"3000"
+    },
+    {
+      id:2,
+      name:"Computer",
+      price:"200000"
+  },
+  {
+    id:3,
+    name:"Television",
+    price:"30000"
+},
+{
+  id:4,
+  name:"KTM Duke",
+  price:"300000"
+}]
 
-  const [todos,setTodos] = useState([]);
-  const [newTodo, setNewTodos] = useState("");
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editingText, setEditingText] = useState("")
+const handleCart = (id)=>{
+  setPopUp(true)
+  setTimeout(()=>{
+    setPopUp(false)
+  },2000)
+  const cartItem = initialProducts.find((item)=>item.id===id)
+  dispatch(addToCart(cartItem))
   
-
-
-console.log(editingIndex)
-  useEffect(()=>{
-    localStorage.setItem("todos",JSON.stringify(todos))
-  }, [todos])
-
-
-  useEffect(()=>{
-    const savedTodos = JSON.parse(localStorage.getItem("todos")) || [];
-    setTodos(savedTodos)
-  }, [])
-
-
-const addTodo = ()=> {
-  if (newTodo.trim() !== ''){
-    setTodos([...todos,newTodo])
-    console.log(newTodo)
-    setNewTodos("")
-
-  }
-  
-}
-
-const deleteTodo = (index) => {
-  
-  const updatedTodo = todos.filter((curr,i)=> i !== index)
-setTodos(updatedTodo)
-
+  // console.log("my cart items are",cartItem)
+  // console.log(id)
 
 }
 
-const startEditingIndex = (index) => {
-  console.log("startediting triggered")
-  setEditingIndex(index)
-  setEditingText(todos[index])
-
+const handleMyCart = ()=>{
+  setCartOpen(true)
 
 }
 
-const saveEdit = (index)=>{
-  const updatedTodos = [...todos]
-  updatedTodos[index] = editingText
-  setTodos(updatedTodos)
-  setEditingIndex(null);
-  setEditingText("")
+const handleExplore = ()=>{
+  setCartOpen(false)
+
 }
 
-const cancelEdit = () => {
-  setEditingIndex(null);
-  setEditingText(""); 
-};
+const handleOk=()=>{
+  setPopUp(false)
+
+}
 
 
 
-  return (
-    <>
-   
-      <h1 class="text-black-300 font-bold text-2xl mt-5 text-center"> Todo Project</h1>
-      <div class="flex justify-center items-center mt-5 flex-col w-full">
-        <div class="justify-center">
-        <input class = "border rounded text-center" placeholder='Enter your todo'
-        type = 'text'
-        value={newTodo}
-        onChange = {(e)=>setNewTodos(e.target.value)}
-        />
-       
+  return(
+  <div>
+    <h1 className = "font-extrabold text-center my-3 text-3xl">Amazon Products</h1>
+    {/* <button className = "bg-blue-500 p-2 my-3 rounded-lg text-center mx-5" onClick = {handleMyCart}>My cart</button> */}
 
-        <button class="bg-blue-500 text-white border rounded-xl ml-3 px-2 py2" onClick = {addTodo}>Add Todo</button>
-        </div>
-        <ul>
-          {todos.map((each,index)=>(
-             <div className="flex flex-row gap-4 justify-start text-right" key={index}>
+{popUp&&
+ <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded shadow-lg animate-fade-in-out">
+ <div className="alert-content">
+   <h4 className="font-medium">Item Added to Cart</h4>
+   <p className="font-medium">The item has been successfully added to your cart.</p>
+   <button className="border rounded bg-yellow-300 text-white p-2" onClick = {handleOk}>OK</button>
+ </div>
+ </div>
 
-            { editingIndex === index ? (
-            <>
-              
-              <input
-              class="bg-blue-300 text-white p-2 border my-3 rounded-xl"
-              type = "text"
-              placeholder='Edit todo'
-              value = {editingText}
-              onChange = {(e)=>setEditingText(e.target.value)}
-              />
-              
+}
 
-              <button class="bg-green-500 text-white  px-2 py-2 border rounded-xl m-3" onClick={()=>saveEdit(index)}>Save</button>
-              <button class="bg-red-500 text-white  px-2 py-2 border rounded-xl m-3" onClick = {cancelEdit}>Cancel</button>
-             
-             
-              </>
-            ): (
-            
-            <>
-
-            <div class="flex flex-row gap-4 justify-start text-right">
-            <li key = {index}> 
-              <div class="bg-gray-500 h-13 my-3 p-3 border rounded-xl text-white px-5 gap-4 font-medium">
-                
-              {each}
-              
-              
-            <button class="bg-blue-700 text-white mr-2 p-1 px-2 py-2 ml-10 border rounded-xl" onClick = {()=>deleteTodo(index)}> Delete</button>
-            <button class="bg-yellow-500 text-white  px-2 py-2 border rounded-xl m-3" onClick = {()=>startEditingIndex(index)}>Edit</button>
-          
-            </div>
-            </li>
-            </div>
-            </>
-          )}
-          </div>
-
-
-          ))}
-         
-
-
-
-        </ul>
-
-
+{cartOpen ? 
+  <div>
+    <ul>
+    <h1 className = "text-lg mx-3 my-3 font-bold text-left">My cart products</h1>
+    <button onClick = {handleExplore} className = "border rounded p-2 text-white bg-green-500 mx-3">Explore</button>
+    {myCartItems.map((myitem) => (
+      // <h1>{myitem?.name||'no name'}</h1>
+      // console.log("single item",myitem.name)
+      <div classNam ="flex">
+        
+      <div className = "bg-blue-400 p-3 my-3 mx-2 text-center shadow-lg rounded-lg w-1/2">
+     
+      <h1>Name :{myitem.name}</h1>
+      <p>Price:{myitem.price}</p>
+      </div>
+      </div>
+      
+      //  <li key = {myitem.id}>{myitem.name}</li>
+      // <div className = "text-center border rounded-lg bg-slate-500 p-3 my-3 shadow-lg mx-5 w-1/2">
+      // <h1>Name : {myitem.name}</h1>
+     
+      // <p>Price:{myitem.price}</p>
+      // {/* <button className = "border rounded-lg p-2 my-2 hover:bg-slate-700" onClick={()=>handleCart(myitem.id)}>Add to cart</button> */}
+      // </div>
+    ))}
+    </ul>
     </div>
 
-    </>
-  );
+
+:
+
+<div>
+    <ul>
+    <button className = "bg-blue-500 p-2 my-3 rounded-lg text-center mx-5" onClick = {handleMyCart}>My cart</button>
+    {initialProducts.map((item) => (
+      // <li key = {item.id}>{item.name}</li>
+      <div className ="flex justify-center">
+      <div className = "text-center border rounded-lg bg-red-500 p-3 my-3 shadow-lg mx-5 w-1/2">
+      <h1>Name : {item.name}</h1>
+      <p>Price:{item.price}</p>
+      <button className = "border rounded-lg p-2 my-2 hover:bg-slate-700" onClick={()=>handleCart(item.id)}>Add to cart</button>
+      </div>
+      </div>
+    ))}
+    </ul>
+    </div>
+}
+
+
+
+
+
+  </div>
+  )
 }
 
 export default App;
